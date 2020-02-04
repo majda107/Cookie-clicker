@@ -1,4 +1,5 @@
 var loader
+var oof = new Audio('res/oof.mp3')
 
 document.addEventListener('DOMContentLoaded', () => {
     loader = document.querySelector('.loader-bar')
@@ -22,6 +23,13 @@ var storeModel1 = [
         name: 'Auto-clicker'
     },
     {
+        neeeded: 2000,
+        cost: 400,
+        type: 'boost',
+        name: 'Ro-boost!',
+        value: 4
+    },
+    {
         needed: 0,
         cost: 50,
         type: 'ups',
@@ -33,6 +41,20 @@ var storeModel1 = [
         cost: 100,
         type: 'ups',
         value: 2.5,
+        name: 'Robloxian high school'
+    },
+    {
+        needed: 300,
+        cost: 400,
+        type: 'ups',
+        value: 5,
+        name: 'PP big?'
+    },
+    {
+        needed: 300,
+        cost: 1000,
+        type: 'ups',
+        value: 10,
         name: 'Robloxian high school'
     }
 ]
@@ -72,7 +94,8 @@ Vue.component('clicker', {
 
 Vue.component('clicker2', {
     props: [
-        'score'
+        'score',
+        'model'
     ],
     data: function () {
         return {
@@ -81,7 +104,6 @@ Vue.component('clicker2', {
             oofps: 0,
             progress: 0,
             timer: new Timer(1000),
-            model: storeModel1
         }
     },
     created: function() {
@@ -97,37 +119,48 @@ Vue.component('clicker2', {
     methods: {
         clicked: function() {
             let clicker = this.$refs.clicker
-            let rnd = next(-20, 20)
+            let rnd = next(-100, 100)
+
             clicker.style.transform = `rotateZ(${rnd}deg)`
+            oof.currentTime = 0
+            oof.play()
 
             this.times++            
             this.$emit('clicked', this, this.multipiler)
         },
+
+        boost: function(mult) {
+            this.timer.delay /= mult
+            setTimeout(() => {
+                this.timer.delay *= mult
+            }, 10000) // POLISH
+        },
+
         onBought: function(product) {
             this.$emit('bought', product)
         }
     },
-    template: "<div class='container'>Multipiler: {{ multipiler }} </br> Oofs per second (oofps): {{ oofps }}<div class='clicker' ref='clicker' @click='clicked'></div><bar v-bind:progress='progress'></bar>Store:<store2 v-bind:clicker='this' v-bind:model='model' v-bind:score='score' v-on:bought='onBought'></store2></div>"
+    template: "<div class='container'><span class='multipiler'>Multipiler: {{ multipiler }}</span><span class='oofps'>Oofs per second (oofps): {{ oofps }}</span><div class='clicker' ref='clicker' @click='clicked'></div><bar class='bar' v-bind:progress='progress'></bar><div class='clicker-store'>Store:<store2 v-bind:clicker='this' v-bind:model='model.store' v-bind:score='score' v-on:bought='onBought'></store2></div></div>"
 })
 
-Vue.component('store', {
-    props: [
-        'clicker'
-    ],
-    methods: {
-        upgrade: function() {
-            this.clicker.multipiler *= 2
-        },
+// Vue.component('store', {
+//     props: [
+//         'clicker',
+//     ],
+//     methods: {
+//         upgrade: function() {
+//             this.clicker.multipiler *= 2
+//         },
 
-        autoClick: function() {
-            this.clicker.timer.start()
-        },
-        speed: function() {
-            this.clicker.timer.delay /= 2
-        }
-    },
-    template: "<div class='store'><button @click='upgrade()'>Upgrade! [2x]</button><button @click='autoClick()'>Auto-click [buy]</button><button @click='speed()'>Speed [2x]</button></div>"
-})
+//         autoClick: function() {
+//             this.clicker.timer.start()
+//         },
+//         speed: function() {
+//             this.clicker.timer.delay /= 2
+//         }
+//     },
+//     template: "<div class='store'><button @click='upgrade()'>Upgrade! [2x]</button><button @click='autoClick()'>Auto-click [buy]</button><button @click='speed()'>Speed [2x]</button></div>"
+// })
 
 Vue.component('store2', {
     props: [
@@ -139,7 +172,7 @@ Vue.component('store2', {
         buy: function(product) {
             console.log(`Buying ${product.name} for ${product.cost}, actual score: ${this.score}`)
             if(product.cost > this.score) {
-                alert("U don't have enough oofs!")
+                //alert("U don't have enough oofs!")
                 return
             }
 
@@ -154,12 +187,15 @@ Vue.component('store2', {
                 case 'ups':
                     this.clicker.oofps += product.value
                     break
+                case 'boost':
+                    this.clicker.boost(product.value)
+                    break
             }
 
             this.$emit('bought', product)
         }
     },
-    template: "<ul class='store'> <li v-for='product in model'> <button @click='buy(product)'>{{ product.name }} [{{ product.cost }}]</button> </li> </ul>"
+    template: "<ul class='store'> <li v-for='product in model' class='product'> <button @click='buy(product)'>{{ product.name }} [{{ product.cost }}]</button> </li> </ul>"
 })
 
 
@@ -170,23 +206,94 @@ Vue.component('bar', {
     template: "<div class='loader'><div v-bind:style='{ width: progress*100 + \"%\"}' class='loader-bar'></div></div>"
 })
 
+Vue.component('message', {
+    data: function() {
+        return {
+            active: false,
+            message: '',
+        }
+    },
+    methods: {
+        show: function(message, timeout) {
+            this.message = message
+            this.active = true
+            setTimeout(() => {
+                this.active = false
+            }, timeout)
+        }
+    },
+    template: "<div><div v-bind:class='[ active ? \"active-message\" : \"\" ]' class='message'><div class='message-inner'>{{ message }}</div></div></div>"
+})
+
 
 var app = new Vue({
     el: "#app",
     data: {
         score: 0,
+        nextStoreValue: 0,
         clickers: [
-            1, 2, 3
-        ]
+            {
+                store: storeModel1,
+                active: true,
+                cost: 0
+            },
+            {
+                store: storeModel1,
+                active: false,
+                cost: 1000
+            }
+        ],
+        saveTimer: new Timer(20000)
     },
-    template: "<div>Score: {{ score }}<li class='clickers'><clicker2 v-for='clicker in clickers' v-on:clicked='onClicked' v-on:bought='onBought' v-bind:score='score'></clicker2></li></div>",
+    template: "<div><message ref='message'></message><h2>Score: {{ score }}</h2><button @click='nextStore()'>Next store [{{ nextStoreValue }}]</button><button @click='save()'>Save</button><li class='clickers'><clicker2 v-for='clicker in clickers' v-if='clicker.active' ref='clicker' v-on:clicked='onClicked' v-on:bought='onBought' v-bind:score='score' v-bind:model='clicker'></clicker2></li></div>",
     methods: {
         onClicked: function(clicker, addition) {
-            this.score += addition
-        },
-        
+            this.score += addition 
+        }, 
         onBought: function(product) {
             this.score -= product.cost
+        },
+
+        nextStore: function() {
+            for(let clicker of this.clickers) {
+                if(!clicker.active && this.score >= clicker.cost) {
+                    this.score -= clicker.cost
+                    clicker.active = true
+                    return
+                }
+            }
+        },
+
+        nextStoreCost: function() {
+            for(let clicker of this.clickers) {
+                if(!clicker.active) {
+                    this.nextStoreValue = clicker.cost
+                    return
+                }
+            }
+            this.nextStoreValue = -1
+        },
+
+        save: function() {
+            this.$refs.message.show('Progress saved...!', 3000)
+            localStorage.setItem("score", this.score)
+        },
+
+        load: function() {
+            let loaded = localStorage.getItem("score")
+            if(loaded != undefined) {
+                this.score = parseInt(loaded)
+            }
         }
+    },
+    created: function() {
+        this.load()
+
+        this.saveTimer.onTick(() => {
+            this.save()
+        })
+        this.saveTimer.start()
+
+        this.nextStoreCost()
     }
 })
