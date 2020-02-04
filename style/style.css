@@ -11,7 +11,7 @@
 }
 
 .clicker {
-    transition-duration: 50ms;
+    transition-duration: 200ms;
     background-image: url('/res/roblox.jpg');
     background-size: cover;
     width: 200px;
@@ -19,7 +19,34 @@
     border-radius: 20px;
 }
 
+.container {
+    display: grid;
+    grid-template-areas: '';
+}
+
 .clickers {
     display: flex;
-    flex-flow: row;
+    flex-flow: column;
+}
+
+* {
+    padding: 0;
+    margin: 0;
+    font-family: 'Open Sans';
+    color: #dfe6e9;
+}
+
+body {
+    background-color: #2d3436;
+}
+
+ul {
+    list-style-type: none;
+}
+
+button {
+    background-color: #2d3436;
+    border: 1px solid #636e72;
+    border-radius: 6px;
+    padding: 6px;
 }
