@@ -59,38 +59,38 @@ var storeModel1 = [
     }
 ]
 
-Vue.component('clicker', {
-    data: function() {
-        return {
-            times: 0,
-            multipiler: 1,
-            timer: new Timer(2000)
-        }
-    },
-    methods: {
-        clicked: function() {
-            this.times += this.multipiler
-            console.log("Clicked...", this.times, this.multipiler)
-        },
+// Vue.component('clicker', {
+//     data: function() {
+//         return {
+//             times: 0,
+//             multipiler: 1,
+//             timer: new Timer(2000)
+//         }
+//     },
+//     methods: {
+//         clicked: function() {
+//             this.times += this.multipiler
+//             console.log("Clicked...", this.times, this.multipiler)
+//         },
 
-        multipy: function() {
-            this.multipiler++;
-            this.timer.delay /= 2
-            console.log("Multipying...")
-        },
+//         multipy: function() {
+//             this.multipiler++;
+//             this.timer.delay /= 2
+//             console.log("Multipying...")
+//         },
 
-        startTimer: function () {
-            this.timer.onTick(() => console.log('test lmao'))
-            this.timer.onFrame(() => {
-                loader.style.width = `${this.timer.blend() * 100}%`
-                //console.log(this.timer.blend())
-                //loader.style.width = "100%"
-            })
-            this.timer.start()
-        }
-    },
-    template: "<div>Clicked: {{ times }} </br> Multipiler: {{ multipiler }}<button @click='clicked()'>Click me! (clicker)</button><button @click='multipy()'>Multipy!</button><button @click='startTimer()'>Start timer...</button></div>"
-})
+//         startTimer: function () {
+//             this.timer.onTick(() => console.log('test lmao'))
+//             this.timer.onFrame(() => {
+//                 loader.style.width = `${this.timer.blend() * 100}%`
+//                 //console.log(this.timer.blend())
+//                 //loader.style.width = "100%"
+//             })
+//             this.timer.start()
+//         }
+//     },
+//     template: "<div>Clicked: {{ times }} </br> Multipiler: {{ multipiler }}<button @click='clicked()'>Click me! (clicker)</button><button @click='multipy()'>Multipy!</button><button @click='startTimer()'>Start timer...</button></div>"
+// })
 
 Vue.component('clicker2', {
     props: [
@@ -140,7 +140,7 @@ Vue.component('clicker2', {
             this.$emit('bought', product)
         }
     },
-    template: "<div class='container'><span class='multipiler'>Multipiler: {{ multipiler }}</span><span class='oofps'>Oofs per second (oofps): {{ oofps }}</span><div class='clicker' ref='clicker' @click='clicked'></div><bar class='bar' v-bind:progress='progress'></bar><div class='clicker-store'>Store:<store2 v-bind:clicker='this' v-bind:model='model.store' v-bind:score='score' v-on:bought='onBought'></store2></div></div>"
+    template: "<div class='container'><span class='multipiler'>Multipiler: {{ multipiler }}</span><span class='oofps'>Oofs per second (oofps): {{ oofps }}</span><div class='clicker' ref='clicker' @click='clicked' v-bind:style='\"background-image: url(\" + model.image + \")\"'></div><bar class='bar' v-bind:progress='progress'></bar><div class='clicker-store'>Store:<store2 v-bind:clicker='this' v-bind:model='model.store' v-bind:score='score' v-on:bought='onBought'></store2></div></div>"
 })
 
 // Vue.component('store', {
@@ -235,12 +235,14 @@ var app = new Vue({
             {
                 store: storeModel1,
                 active: true,
-                cost: 0
+                cost: 0,
+                image: 'res/roblox.jpg'
             },
             {
                 store: storeModel1,
                 active: false,
-                cost: 1000
+                cost: 1000,
+                image: 'https://pbs.twimg.com/profile_images/927250297759690753/q51pRtu2_400x400.jpg'
             }
         ],
         saveTimer: new Timer(20000)
